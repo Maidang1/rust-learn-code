@@ -7,7 +7,9 @@ pub mod constants;
 pub mod parser;
 pub mod visitor;
 
-use parser::{ParseOptions, ParseResult};
+use parser::{parse_code, ParseOptions, ParseResult};
+#[cfg(feature = "parallel")]
+use rayon::prelude::*;
 #[napi(object)]
 pub struct Config {
   pub input: Vec<ParseOptions>,
@@ -22,16 +24,18 @@ pub struct Result {
 #[napi]
 #[cfg(feature = "official")]
 fn parse(config: Config) {
-  use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-
   let Config { input } = config;
-  #[cfg(feature = "parallel")]
-  let iterator = input.par_iter();
+  let iterator = input.iter();
 
-  let output = iterator.map(|opts| {
-    let current_opts = opts.clone();
-    println!("opts: {:?}", current_opts);
-  });
+  iterator
+    .map(|opts| {
+      let opts = opts.clone();
+      parse_code(opts.clone())
+    })
+    .collect()
 
-  println!("output: {:?}", output);
+  // let _ = iterator.map(|opts| {
+  //   println!("opts: {:?}", opts.clone());
+  //   parse_code(opts.clone());
+  // });
 }
