@@ -17,25 +17,25 @@ pub struct Config {
 
 #[napi(object)]
 #[derive(Debug, Default)]
-pub struct Result {
+pub struct ResultOutput {
   pub output: Vec<ParseResult>,
 }
 
 #[napi]
 #[cfg(feature = "official")]
-fn parse(config: Config) {
+fn parse(config: Config) -> Result<ResultOutput, anyhow::Error> {
+  use anyhow::Ok;
+
   let Config { input } = config;
   let iterator = input.iter();
 
-  iterator
+  let mut output = iterator
     .map(|opts| {
       let opts = opts.clone();
       parse_code(opts.clone())
     })
-    .collect()
+    .collect::<Result<Vec<ParseResult>, anyhow::Error>>()?;
 
-  // let _ = iterator.map(|opts| {
-  //   println!("opts: {:?}", opts.clone());
-  //   parse_code(opts.clone());
-  // });
+  let result = ResultOutput { output };
+  Ok(result)
 }

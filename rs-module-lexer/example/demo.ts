@@ -1,6 +1,6 @@
 import { parse } from 'rs-module-lexer'
 
-parse({
+const result = parse({
   input: [
     {
       filename: 'index.ts',
@@ -12,3 +12,5 @@ parse({
     // ... other files
   ],
 })
+
+console.log(result)

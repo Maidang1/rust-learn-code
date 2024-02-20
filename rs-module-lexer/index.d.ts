@@ -10,7 +10,7 @@ export interface ParseOptions {
 export interface ParseResult {
   filename: string
   imports: Array<ImportSpecifier>
-  exports: Array<ImportSpecifier>
+  exports: Array<ExportSpecifier>
   facade: boolean
 }
 export interface ImportSpecifier {
@@ -46,7 +46,7 @@ export interface ExportSpecifier {
 export interface Config {
   input: Array<ParseOptions>
 }
-export interface Result {
+export interface ResultOutput {
   output: Array<ParseResult>
 }
-export function parse(config: Config): void
+export function parse(config: Config): ResultOutput

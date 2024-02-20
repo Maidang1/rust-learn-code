@@ -1,10 +1,16 @@
 use std::path::PathBuf;
 
-use swc_ecmascript::parser::{EsConfig, Syntax, TsConfig};
+use swc_common::{
+  comments::SingleThreadedComments, input::StringInput, sync::Lrc, FileName, Globals, SourceMap,
+};
+use swc_ecmascript::{
+  parser::{lexer::Lexer, EsConfig, Parser, Syntax, TsConfig},
+  visit::VisitMutWith,
+};
 
 use crate::{
   constants::{JS_EXITS, TS_EXITS},
-  visitor::{ExportSpecifier, ImportSpecifier},
+  visitor::{ExportSpecifier, ImportExportVisitor, ImportSpecifier},
 };
 
 #[napi(object)]
@@ -19,11 +25,11 @@ pub struct ParseOptions {
 pub struct ParseResult {
   pub filename: String,
   pub imports: Vec<ImportSpecifier>,
-  pub exports: Vec<ImportSpecifier>,
+  pub exports: Vec<ExportSpecifier>,
   pub facade: bool,
 }
 
-pub fn parse_code(opts: ParseOptions) {
+pub fn parse_code(opts: ParseOptions) -> Result<ParseResult, anyhow::Error> {
   println!("parse_code start");
   let ParseOptions { filename, code } = opts;
   let file_info = parse_filename(&filename);
@@ -48,6 +54,37 @@ pub fn parse_code(opts: ParseOptions) {
     })
   };
   println!("parsing: {:?}", syntax);
+
+  let source_map = Lrc::new(SourceMap::default());
+  let source_file = source_map.new_source_file(
+    FileName::Real(filename_path_buf.clone()),
+    code.clone().into(),
+  );
+  let comment = SingleThreadedComments::default();
+  let lexer = Lexer::new(
+    syntax,
+    Default::default(),
+    StringInput::from(&*source_file),
+    Some(&comment),
+  );
+
+  let mut parser = Parser::new_from(lexer);
+  let module = parser.parse_module().expect("fail to parse module");
+
+  swc_common::GLOBALS.set(&Globals::new(), || {
+    let mut module = module;
+    let mut visitor = ImportExportVisitor::new(code, source_map, source_file);
+
+    module.visit_mut_with(&mut visitor);
+
+    println!("start parse module");
+    Ok(ParseResult {
+      imports: visitor.imports,
+      exports: visitor.exports,
+      facade: visitor.facade,
+      filename: filename,
+    })
+  })
 }
 
 #[derive(Debug)]
