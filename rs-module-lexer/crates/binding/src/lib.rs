@@ -29,12 +29,14 @@ fn parse(config: Config) -> Result<ResultOutput, anyhow::Error> {
   let Config { input } = config;
   let iterator = input.iter();
 
-  let mut output = iterator
+  let output = iterator
     .map(|opts| {
       let opts = opts.clone();
       parse_code(opts.clone())
     })
     .collect::<Result<Vec<ParseResult>, anyhow::Error>>()?;
+
+    println!("{:#?}", output);
 
   let result = ResultOutput { output };
   Ok(result)
