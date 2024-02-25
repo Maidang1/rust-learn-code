@@ -1,0 +1,11 @@
+[workspace]
+members = ["crates/*"]
+resolver = "2"
+
+[workspace.dependencies]
+napi = {version = "2.15.0", default-features = false, features = [
+  "napi4",
+  "error_anyhow",
+  "serde-json",
+]}
+napi-derive = "2.15.0"

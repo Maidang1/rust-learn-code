@@ -1,0 +1,30 @@
+{
+  "name": "farm-start",
+  "version": "0.0.0",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "napi": {
+    "name": "farm-start",
+    "triples": {}
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@napi-rs/cli": "^2.18.0",
+    "ava": "^6.0.1"
+  },
+  "ava": {
+    "timeout": "3m"
+  },
+  "engines": {
+    "node": ">= 10"
+  },
+  "scripts": {
+    "artifacts": "napi artifacts",
+    "build:dev": "pnpm -r --filter=@bindings/cli run build:rs:debug",
+    "prepublishOnly": "napi prepublish -t npm",
+    "test": "ava",
+    "universal": "napi universal",
+    "version": "napi version"
+  },
+  "packageManager": "yarn@4.1.0"
+}

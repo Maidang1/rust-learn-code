@@ -1,0 +1,12 @@
+{
+  "name": "@bindings/cli",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:rs:debug": "napi build --platform --cargo-name farm_cli -p farm_cli --cargo-cwd ../../ binding --js binding.cjs --dts binding.d.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
