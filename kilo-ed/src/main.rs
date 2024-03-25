@@ -1,24 +1,20 @@
-mod input;
-mod keyboard;
-mod output;
+use crossterm::{terminal, Result};
 
-
-use crossterm::{event::Event::*, terminal, Result};
-use input::*;
-use output::{die, editor_refresh_screen};
+mod editor;
+use editor::*;
 
 fn main() -> Result<()> {
+    let editor = Editor::new()?;
+    println!("editor stats: {editor:?}");
     terminal::enable_raw_mode()?;
     loop {
-        if editor_refresh_screen().is_err() {
-            die("unable to refresh screen");
+        if editor.refresh_screen().is_err() {
+            editor.die("unable to refresh screen");
         }
-
-        if editor_process_keypress() {
+        if editor.process_keypress() {
             break;
         }
     }
     terminal::disable_raw_mode()?;
-
     Ok(())
 }
